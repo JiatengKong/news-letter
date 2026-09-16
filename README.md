@@ -6,7 +6,7 @@ On subscribe, Daily Brief emails today's brief immediately and confirms the subs
 
 Manage and unsubscribe links are in every email. There is no login: the manage URL is the credential.
 
-Live app: https://daily-brief-iota-two.vercel.app
+Live public sample: https://daily-brief-iota-two.vercel.app/preview
 
 ## Local development
 
