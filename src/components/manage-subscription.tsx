@@ -119,6 +119,7 @@ export function ManageSubscription({
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
+          variant="outline"
           size="lg"
           disabled={pending}
           onClick={() => setEditing(true)}
@@ -129,6 +130,7 @@ export function ManageSubscription({
           <Button
             type="button"
             variant="outline"
+            size="lg"
             disabled={pending}
             onClick={() => setStatus("active")}
           >
@@ -138,6 +140,7 @@ export function ManageSubscription({
           <Button
             type="button"
             variant="outline"
+            size="lg"
             disabled={pending || status !== "active"}
             onClick={() => setStatus("paused")}
           >
@@ -147,7 +150,8 @@ export function ManageSubscription({
         {status !== "unsubscribed" ? (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
+            size="lg"
             disabled={pending}
             onClick={() => setStatus("unsubscribed")}
           >
