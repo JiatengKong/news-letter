@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TOPICS, type TopicId } from "@/lib/types";
-import { TIMEZONES, cronLocalTime } from "@/lib/schedule";
+import { timezonesBySendTime, cronLocalTime } from "@/lib/schedule";
 
 type Props = {
   defaults?: {
@@ -115,9 +115,9 @@ export function SubscribeForm({
           value={timezone}
           onChange={(event) => setTimezone(event.target.value)}
         >
-          {TIMEZONES.map((zone) => (
+          {timezonesBySendTime().map((zone) => (
             <option key={zone} value={zone}>
-              {zone} · {cronLocalTime(zone)}
+              {cronLocalTime(zone)} · {zone}
             </option>
           ))}
         </select>

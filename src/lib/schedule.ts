@@ -46,18 +46,34 @@ export function digestKeyFor(subscriberId: string, at: Date, timezone: string) {
 }
 
 export const TIMEZONES = [
-  "Europe/Berlin",
-  "Europe/London",
-  "Europe/Paris",
-  "UTC",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
   "America/Los_Angeles",
+  "America/Denver",
+  "America/Chicago",
+  "America/New_York",
   "America/Sao_Paulo",
-  "Asia/Tokyo",
-  "Asia/Shanghai",
-  "Asia/Singapore",
+  "UTC",
+  "Europe/London",
+  "Europe/Berlin",
+  "Europe/Paris",
   "Asia/Kolkata",
+  "Asia/Singapore",
+  "Asia/Shanghai",
+  "Asia/Tokyo",
   "Australia/Sydney",
 ];
+
+function cronDateTime(timezone: string, at: Date) {
+  return DateTime.fromJSDate(at, { zone: "UTC" })
+    .set({ hour: CRON_UTC_HOUR, minute: 0, second: 0, millisecond: 0 })
+    .setZone(timezone || "UTC");
+}
+
+export function timezonesBySendTime(at: Date = new Date()) {
+  return [...TIMEZONES].sort((a, b) => {
+    const left = cronDateTime(a, at);
+    const right = cronDateTime(b, at);
+    const byOffset = left.offset - right.offset;
+    if (byOffset !== 0) return byOffset;
+    return a.localeCompare(b);
+  });
+}

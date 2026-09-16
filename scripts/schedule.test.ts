@@ -7,6 +7,7 @@ import {
   computeNextCronAt,
   cronLocalTime,
   digestKeyFor,
+  timezonesBySendTime,
 } from "../src/lib/schedule";
 import { createJsonStore } from "../src/lib/json-store";
 
@@ -28,6 +29,20 @@ test("timezone only relabels 06:00 UTC, it does not move the send", () => {
   const at = new Date("2026-09-16T12:00:00.000Z");
   assert.match(cronLocalTime("Europe/Berlin", at), /^08:00 /);
   assert.match(cronLocalTime("America/New_York", at), /^02:00 /);
+});
+
+test("timezone list is ordered from earliest to latest local send time", () => {
+  const ordered = timezonesBySendTime(new Date("2026-09-16T12:00:00.000Z"));
+  assert.ok(
+    ordered.indexOf("America/Los_Angeles") <
+      ordered.indexOf("America/New_York"),
+  );
+  assert.ok(ordered.indexOf("America/New_York") < ordered.indexOf("UTC"));
+  assert.ok(ordered.indexOf("UTC") < ordered.indexOf("Europe/Berlin"));
+  assert.ok(ordered.indexOf("Europe/Berlin") < ordered.indexOf("Asia/Tokyo"));
+  assert.ok(
+    ordered.indexOf("Asia/Tokyo") < ordered.indexOf("Australia/Sydney"),
+  );
 });
 
 test("digest key is local calendar date, so a retry the same morning is idempotent", () => {
