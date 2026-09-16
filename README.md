@@ -1,6 +1,6 @@
 # Daily Brief
 
-A once-a-day world news digest. Subscribers pick their timezone and desks (world, politics, business, science, climate, culture). Each issue is built from BBC, The Guardian, NPR, and Al Jazeera RSS feeds and sent with Resend.
+A once-a-day world news digest. Subscribers pick their timezone and desks (world, politics, business, science, climate, culture). Each issue takes two stories per desk, in the order chosen, from BBC, The Guardian, NPR, and Al Jazeera, and is sent with Resend.
 
 On subscribe, Daily Brief emails today's brief immediately and confirms the subscription. After that, **every subscriber is sent on the same Vercel Hobby cron: 06:00 UTC** (`0 6 * * *` in `vercel.json`). Timezone only changes how that clock time is displayed (08:00 in Berlin in summer, 02:00 in New York, and so on). A per-person send hour is not offered, because Hobby can run only one cron job per day.
 
