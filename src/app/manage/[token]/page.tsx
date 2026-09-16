@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { ManageSubscription } from "@/components/manage-subscription";
 import { getStore } from "@/lib/store";
+import { cronLocalTime } from "@/lib/schedule";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -15,6 +16,7 @@ export default async function ManagePage({
   const query = await searchParams;
   const subscriber = await getStore().getByToken(token);
   if (!subscriber) notFound();
+  const localSend = cronLocalTime(subscriber.timezone);
 
   return (
     <main className="mx-auto w-full max-w-xl px-4 py-12">
@@ -32,7 +34,7 @@ export default async function ManagePage({
       </div>
       <p className="mt-3 text-sm text-muted-foreground">
         {query.welcome
-          ? "Check your inbox: today’s brief is on the way. The daily send starts tomorrow at 06:00 UTC."
+          ? `Check your inbox: today’s brief is on the way. The daily send starts tomorrow at ${localSend}.`
           : "Your current send settings."}
       </p>
 

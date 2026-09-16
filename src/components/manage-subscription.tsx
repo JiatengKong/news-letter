@@ -92,9 +92,6 @@ export function ManageSubscription({
         <div>
           <dt className="text-muted-foreground">Daily send</dt>
           <dd className="mt-1 font-medium">{localCron}</dd>
-          <dd className="mt-1 text-muted-foreground">
-            Fixed at 06:00 UTC for every subscriber.
-          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Topics</dt>
