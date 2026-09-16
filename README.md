@@ -1,6 +1,8 @@
 # Daily Brief
 
-A once-a-day world news digest. Subscribers pick a local hour and desks (world, politics, business, science, climate, culture). Each issue is built from BBC, The Guardian, NPR, and Al Jazeera RSS feeds and sent with Resend.
+A once-a-day world news digest. Subscribers pick a timezone and desks (world, politics, business, science, climate, culture). Each issue is built from BBC, The Guardian, NPR, and Al Jazeera RSS feeds and sent with Resend.
+
+On subscribe, Daily Brief emails today's brief immediately and confirms the subscription. After that, **every subscriber is sent on the same Vercel Hobby cron: 06:00 UTC** (`0 6 * * *` in `vercel.json`). Timezone only changes how that clock time is displayed (08:00 in Berlin in summer, 02:00 in New York, and so on). A per-person send hour is not offered, because Hobby can run only one cron job per day.
 
 Manage and unsubscribe links are in every email. There is no login: the manage URL is the credential.
 
@@ -20,7 +22,7 @@ npm run lint
 npm run build
 ```
 
-Seed the production subscriber (active, 08:00 Europe/Berlin → `2026-09-17T06:00:00Z`):
+Seed the production subscriber (active, next send `2026-09-17T06:00:00Z`):
 
 ```bash
 DATABASE_URL="postgresql://..." npm run seed
@@ -42,26 +44,6 @@ DATABASE_URL="postgresql://..." npm run seed
 
 The tick is **idempotent**: it claims `(subscriber_id, digest_key)` where `digest_key` is `id:local-date` in the subscriber's timezone. A second call the same morning skips that person. If sending fails, the claim is released so the next tick retries.
 
-Vercel Hobby allows **one cron job per day**. `vercel.json` runs at `0 6 * * *` (06:00 UTC). During Central European Summer Time that is **08:00 Europe/Berlin**, which matches this project's default send time. In winter (CET, UTC+1) 08:00 Berlin is 07:00 UTC — Hobby cannot add a second schedule.
-
-### 15-minute external pinger (other send times)
-
-If anyone needs a send hour other than 08:00 Berlin, ping the same endpoint about every 15 minutes from outside Vercel (GitHub Actions, cron-job.org, healthchecks.io, a cheap VPS):
-
-```bash
-curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron"
-```
-
-The daily Vercel cron can stay in place; extra pings are cheap because of the send claim.
-
 ## Deploy
 
 The GitHub repo is the production source. Create a Vercel project on the Hobby team, set the env vars, deploy, then set `APP_URL` to the real `https://` domain and redeploy so email links resolve.
-
-After `APP_URL` is correct, send one live digest:
-
-```bash
-curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron"
-```
-
-That only sends to subscribers whose `nextSendAt` is due. To force the seeded reader onto this tick, set `nextSendAt` to now (or slightly in the past) in Neon, then call cron once.

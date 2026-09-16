@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { getStore } from "@/lib/store";
-import { computeNextSendAt } from "@/lib/schedule";
-import { clampHour, sanitizeTopics } from "@/lib/subscriber";
+import { CRON_UTC_HOUR, computeNextCronAt } from "@/lib/schedule";
+import { sanitizeTopics } from "@/lib/subscriber";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     token?: string;
     timezone?: string;
-    sendHour?: number;
     topics?: string[];
     status?: "active" | "paused" | "unsubscribed";
   } | null;
@@ -23,17 +22,16 @@ export async function POST(request: Request) {
   }
 
   const timezone = body.timezone?.trim() || subscriber.timezone;
-  const sendHour = clampHour(Number(body.sendHour ?? subscriber.sendHour));
   const topics = sanitizeTopics(body.topics ?? subscriber.topics);
   const status = body.status ?? subscriber.status;
   const nextSendAt =
     status === "active"
-      ? computeNextSendAt(new Date(), timezone, sendHour)
+      ? computeNextCronAt(new Date())
       : subscriber.nextSendAt;
 
   const updated = await store.update(subscriber.id, {
     timezone,
-    sendHour,
+    sendHour: CRON_UTC_HOUR,
     topics,
     status,
     nextSendAt,

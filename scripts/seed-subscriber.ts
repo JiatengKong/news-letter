@@ -4,7 +4,6 @@ import { ensureSchema } from "../src/lib/pg-store";
 async function main() {
   const email = process.env.SEED_EMAIL || "jtngkong@gmail.com";
   const timezone = process.env.SEED_TIMEZONE || "Europe/Berlin";
-  const sendHour = Number(process.env.SEED_SEND_HOUR || 8);
   const nextSendAt =
     process.env.SEED_NEXT_SEND_AT || "2026-09-17T06:00:00.000Z";
 
@@ -18,7 +17,7 @@ async function main() {
   const subscriber = await store.create({
     email,
     timezone,
-    sendHour,
+    sendHour: 6,
     topics: ["world", "politics", "business", "science"],
     nextSendAt,
   });
@@ -27,7 +26,7 @@ async function main() {
   await store.update(subscriber.id, {
     status: "active",
     timezone,
-    sendHour,
+    sendHour: 6,
     nextSendAt,
   });
 

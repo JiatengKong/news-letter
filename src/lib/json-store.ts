@@ -14,13 +14,15 @@ type DbShape = {
   sendClaims: { subscriberId: string; digestKey: string }[];
 };
 
-const FILE = path.join(process.cwd(), "data", "store.json");
+function storeFile() {
+  return path.join(process.cwd(), "data", "store.json");
+}
 
 let writeChain: Promise<void> = Promise.resolve();
 
 async function readDb(): Promise<DbShape> {
   try {
-    const raw = await readFile(FILE, "utf8");
+    const raw = await readFile(storeFile(), "utf8");
     return JSON.parse(raw) as DbShape;
   } catch {
     return { subscribers: [], sendClaims: [] };
@@ -28,8 +30,9 @@ async function readDb(): Promise<DbShape> {
 }
 
 async function writeDb(db: DbShape) {
-  await mkdir(path.dirname(FILE), { recursive: true });
-  await writeFile(FILE, JSON.stringify(db, null, 2));
+  const file = storeFile();
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, JSON.stringify(db, null, 2));
 }
 
 function withLock<T>(fn: () => Promise<T>): Promise<T> {

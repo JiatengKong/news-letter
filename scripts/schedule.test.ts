@@ -3,13 +3,31 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { computeNextSendAt, digestKeyFor } from "../src/lib/schedule";
+import {
+  computeNextCronAt,
+  cronLocalTime,
+  digestKeyFor,
+} from "../src/lib/schedule";
 import { createJsonStore } from "../src/lib/json-store";
 
-test("08:00 Berlin on 16 Sep 2026 maps to 06:00 UTC the next morning", () => {
+test("after the daily 06:00 UTC run, the next slot is tomorrow 06:00 UTC", () => {
   const from = new Date("2026-09-16T12:00:00.000Z");
-  const next = computeNextSendAt(from, "Europe/Berlin", 8);
+  const next = computeNextCronAt(from);
   assert.equal(next, "2026-09-17T06:00:00.000Z");
+});
+
+test("subscribe skipToday waits until tomorrow even if today's cron has not run yet", () => {
+  const from = new Date("2026-09-16T05:00:00.000Z");
+  const sameDay = computeNextCronAt(from);
+  const tomorrow = computeNextCronAt(from, { skipToday: true });
+  assert.equal(sameDay, "2026-09-16T06:00:00.000Z");
+  assert.equal(tomorrow, "2026-09-17T06:00:00.000Z");
+});
+
+test("timezone only relabels 06:00 UTC, it does not move the send", () => {
+  const at = new Date("2026-09-16T12:00:00.000Z");
+  assert.match(cronLocalTime("Europe/Berlin", at), /^08:00 /);
+  assert.match(cronLocalTime("America/New_York", at), /^02:00 /);
 });
 
 test("digest key is local calendar date, so a retry the same morning is idempotent", () => {
@@ -35,7 +53,7 @@ test("json store claimSend is exclusive", async (t) => {
     const created = await store.create({
       email: "reader@example.com",
       timezone: "Europe/Berlin",
-      sendHour: 8,
+      sendHour: 6,
       topics: ["world"],
       nextSendAt: "2026-09-17T06:00:00.000Z",
     });

@@ -1,28 +1,40 @@
 import { DateTime } from "luxon";
 
-export function computeNextSendAt(
-  from: Date,
-  timezone: string,
-  sendHour: number,
-): string {
-  const zone = timezone || "UTC";
-  let local = DateTime.fromJSDate(from, { zone });
-  if (!local.isValid) {
-    local = DateTime.fromJSDate(from, { zone: "UTC" });
-  }
+/** Vercel Hobby can run only one cron per day. This is that slot. */
+export const CRON_UTC_HOUR = 6;
 
-  let next = local.set({
-    hour: sendHour,
+export function computeNextCronAt(
+  from: Date,
+  options?: { skipToday?: boolean },
+): string {
+  const now = DateTime.fromJSDate(from, { zone: "UTC" });
+  let next = now.set({
+    hour: CRON_UTC_HOUR,
     minute: 0,
     second: 0,
     millisecond: 0,
   });
 
-  if (next <= local) {
+  if (options?.skipToday || next <= now) {
     next = next.plus({ days: 1 });
   }
 
   return next.toUTC().toISO()!;
+}
+
+export function formatLocalSend(iso: string, timezone: string): string {
+  const local = DateTime.fromISO(iso, { zone: timezone || "UTC" });
+  const value = local.isValid
+    ? local
+    : DateTime.fromISO(iso, { zone: "UTC" });
+  return value.toFormat("ccc d LLL, HH:mm ZZZZ");
+}
+
+export function cronLocalTime(timezone: string, at: Date = new Date()): string {
+  const local = DateTime.fromJSDate(at, { zone: "UTC" })
+    .set({ hour: CRON_UTC_HOUR, minute: 0, second: 0, millisecond: 0 })
+    .setZone(timezone || "UTC");
+  return local.toFormat("HH:mm ZZZZ");
 }
 
 export function digestKeyFor(subscriberId: string, at: Date, timezone: string) {

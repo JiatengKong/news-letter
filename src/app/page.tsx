@@ -23,12 +23,13 @@ export default function Home() {
             className="max-w-xl text-4xl leading-tight font-semibold tracking-tight sm:text-5xl"
             style={{ fontFamily: "var(--font-serif)" }}
           >
-            The world, briefly, at the hour you actually read email.
+            The world, briefly, once a day.
           </h1>
           <p className="max-w-lg text-base leading-7 text-muted-foreground">
-            One email a day from BBC, The Guardian, NPR, and Al Jazeera. Pick
-            your hour and desks here; manage or leave from the link in every
-            issue.
+            One email a day from BBC, The Guardian, NPR, and Al Jazeera. You get
+            today’s brief as soon as you subscribe. After that, everyone is sent
+            on the same daily run at 06:00 UTC — pick a timezone so that time is
+            shown in your clock.
           </p>
         </section>
 

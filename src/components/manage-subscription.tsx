@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SubscribeForm } from "@/components/subscribe-form";
+import { cronLocalTime, formatLocalSend } from "@/lib/schedule";
 import { TOPICS, type TopicId } from "@/lib/types";
 
 type Props = {
@@ -12,7 +13,6 @@ type Props = {
   email: string;
   status: string;
   timezone: string;
-  sendHour: number;
   topics: TopicId[];
   nextSendAt: string;
 };
@@ -26,7 +26,6 @@ export function ManageSubscription({
   email,
   status,
   timezone,
-  sendHour,
   topics,
   nextSendAt,
 }: Props) {
@@ -35,16 +34,8 @@ export function ManageSubscription({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hourLabel = `${String(sendHour).padStart(2, "0")}:00`;
-  const nextSend = new Date(nextSendAt).toLocaleString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: timezone,
-    timeZoneName: "short",
-  });
+  const localCron = cronLocalTime(timezone);
+  const nextSend = formatLocalSend(nextSendAt, timezone);
 
   async function setStatus(next: "active" | "paused" | "unsubscribed") {
     setPending(true);
@@ -57,7 +48,6 @@ export function ManageSubscription({
           token,
           status: next,
           timezone,
-          sendHour,
           topics,
         }),
       });
@@ -77,16 +67,14 @@ export function ManageSubscription({
 
   if (editing) {
     return (
-      <div className="grid gap-6">
-        <SubscribeForm
-          mode="manage"
-          token={token}
-          status={status}
-          defaults={{ email, timezone, sendHour, topics }}
-          onCancel={() => setEditing(false)}
-          onSaved={() => setEditing(false)}
-        />
-      </div>
+      <SubscribeForm
+        mode="manage"
+        token={token}
+        status={status}
+        defaults={{ email, timezone, topics }}
+        onCancel={() => setEditing(false)}
+        onSaved={() => setEditing(false)}
+      />
     );
   }
 
@@ -97,15 +85,16 @@ export function ManageSubscription({
           <dt className="text-muted-foreground">Email</dt>
           <dd className="mt-1 font-medium">{email}</dd>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <dt className="text-muted-foreground">Timezone</dt>
-            <dd className="mt-1 font-medium">{timezone}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Send time</dt>
-            <dd className="mt-1 font-medium">{hourLabel} local</dd>
-          </div>
+        <div>
+          <dt className="text-muted-foreground">Timezone</dt>
+          <dd className="mt-1 font-medium">{timezone}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Daily send</dt>
+          <dd className="mt-1 font-medium">{localCron}</dd>
+          <dd className="mt-1 text-muted-foreground">
+            Fixed at 06:00 UTC for every subscriber.
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Topics</dt>

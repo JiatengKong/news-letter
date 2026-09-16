@@ -32,7 +32,7 @@ export default async function ManagePage({
       </div>
       <p className="mt-3 text-sm text-muted-foreground">
         {query.welcome
-          ? "You are in. This page is a record of what you chose."
+          ? "Check your inbox: today’s brief is on the way. The daily send starts tomorrow at 06:00 UTC."
           : "Your current send settings."}
       </p>
 
@@ -43,7 +43,6 @@ export default async function ManagePage({
             email={subscriber.email}
             status={subscriber.status}
             timezone={subscriber.timezone}
-            sendHour={subscriber.sendHour}
             topics={subscriber.topics}
             nextSendAt={subscriber.nextSendAt}
           />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,13 +9,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TOPICS, type TopicId } from "@/lib/types";
 import { TIMEZONES } from "@/lib/schedule";
 
-const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
-
 type Props = {
   defaults?: {
     email?: string;
     timezone?: string;
-    sendHour?: number;
     topics?: TopicId[];
   };
   mode?: "subscribe" | "manage";
@@ -36,18 +33,12 @@ export function SubscribeForm({
   const router = useRouter();
   const [email, setEmail] = useState(defaults?.email ?? "");
   const [timezone, setTimezone] = useState(defaults?.timezone ?? "Europe/Berlin");
-  const [sendHour, setSendHour] = useState(defaults?.sendHour ?? 8);
   const [topics, setTopics] = useState<TopicId[]>(
     defaults?.topics ?? ["world", "politics", "business"],
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
-
-  const hourLabel = useMemo(
-    () => `${String(sendHour).padStart(2, "0")}:00`,
-    [sendHour],
-  );
 
   function toggleTopic(id: TopicId, checked: boolean) {
     setTopics((current) => {
@@ -70,7 +61,6 @@ export function SubscribeForm({
         body: JSON.stringify({
           email,
           timezone,
-          sendHour,
           topics,
           token,
           status: status === "unsubscribed" ? "active" : status,
@@ -89,11 +79,7 @@ export function SubscribeForm({
       router.refresh();
       onSaved?.();
       if (!onSaved) {
-        setSaved(
-          data.nextSendAt
-            ? `Saved. Next send ${new Date(data.nextSendAt).toUTCString()}.`
-            : "Saved.",
-        );
+        setSaved("Saved.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save.");
@@ -118,42 +104,27 @@ export function SubscribeForm({
           />
         </div>
       ) : (
-        <div>
-          <p className="text-sm text-muted-foreground">{email}</p>
-        </div>
+        <p className="text-sm text-muted-foreground">{email}</p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="timezone">Timezone</Label>
-          <select
-            id="timezone"
-            className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm"
-            value={timezone}
-            onChange={(event) => setTimezone(event.target.value)}
-          >
-            {TIMEZONES.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="hour">Send time ({hourLabel} local)</Label>
-          <select
-            id="hour"
-            className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm"
-            value={sendHour}
-            onChange={(event) => setSendHour(Number(event.target.value))}
-          >
-            {HOURS.map((hour) => (
-              <option key={hour} value={hour}>
-                {String(hour).padStart(2, "0")}:00
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor="timezone">Timezone</Label>
+        <p className="text-xs text-muted-foreground">
+          Everyone is sent on the same daily run (06:00 UTC). Timezone only
+          changes how that time is shown for you.
+        </p>
+        <select
+          id="timezone"
+          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+          value={timezone}
+          onChange={(event) => setTimezone(event.target.value)}
+        >
+          {TIMEZONES.map((zone) => (
+            <option key={zone} value={zone}>
+              {zone}
+            </option>
+          ))}
+        </select>
       </div>
 
       <fieldset className="grid gap-3">

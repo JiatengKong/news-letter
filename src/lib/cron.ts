@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { getStore } from "./store";
 import { buildDigest } from "./digest";
 import { sendDigest } from "./email";
-import { computeNextSendAt, digestKeyFor } from "./schedule";
+import { computeNextCronAt, digestKeyFor } from "./schedule";
 import type { CronTickResult } from "./types";
 
 export function cronAuthorized(header: string | null, querySecret: string | null) {
@@ -47,11 +47,7 @@ export async function runCronTick(now = new Date()): Promise<CronTickResult> {
         digestCache.set(cacheKey, digest);
       }
       await sendDigest(subscriber, digest);
-      const nextSendAt = computeNextSendAt(
-        now,
-        subscriber.timezone,
-        subscriber.sendHour,
-      );
+      const nextSendAt = computeNextCronAt(now);
       await store.markSent(subscriber.id, key, nextSendAt);
       result.sent += 1;
     } catch (error) {

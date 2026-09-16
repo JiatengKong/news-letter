@@ -36,7 +36,11 @@ function formatWhen(iso: string | null) {
   });
 }
 
-export function renderDigestHtml(subscriber: Subscriber, digest: Digest) {
+export function renderDigestHtml(
+  subscriber: Subscriber,
+  digest: Digest,
+  options?: { introHtml?: string },
+) {
   const stories = digest.stories
     .map((story) => {
       const summary = story.summary
@@ -63,6 +67,10 @@ export function renderDigestHtml(subscriber: Subscriber, digest: Digest) {
       World desks were quiet for your selected topics in the last day. We will try again at your next send time.
     </td></tr>`;
 
+  const intro = options?.introHtml
+    ? `<tr><td style="padding:16px 0 8px;color:#5c564e;font-size:15px;line-height:1.55">${options.introHtml}</td></tr>`
+    : "";
+
   return `<!doctype html>
 <html>
 <body style="margin:0;background:#f4efe7;font-family:Georgia, 'Times New Roman', serif;color:#1a1714">
@@ -79,6 +87,7 @@ export function renderDigestHtml(subscriber: Subscriber, digest: Digest) {
               </p>
             </td>
           </tr>
+          ${intro}
           ${stories || empty}
           <tr>
             <td style="padding-top:28px;font-size:13px;color:#6b645c">
@@ -95,10 +104,15 @@ export function renderDigestHtml(subscriber: Subscriber, digest: Digest) {
 </html>`;
 }
 
-export function renderDigestText(subscriber: Subscriber, digest: Digest) {
+export function renderDigestText(
+  subscriber: Subscriber,
+  digest: Digest,
+  options?: { introText?: string },
+) {
   const lines = [
     "Daily Brief",
     "",
+    ...(options?.introText ? [options.introText, ""] : []),
     ...digest.stories.map(
       (s) => `${s.source} — ${s.title}\n${s.summary}\n${s.url}\n`,
     ),
@@ -108,7 +122,15 @@ export function renderDigestText(subscriber: Subscriber, digest: Digest) {
   return lines.join("\n");
 }
 
-export async function sendDigest(subscriber: Subscriber, digest: Digest) {
+export async function sendDigest(
+  subscriber: Subscriber,
+  digest: Digest,
+  options?: {
+    subject?: string;
+    introHtml?: string;
+    introText?: string;
+  },
+) {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY is not set");
   const resend = new Resend(key);
@@ -121,9 +143,9 @@ export async function sendDigest(subscriber: Subscriber, digest: Digest) {
   const { error } = await resend.emails.send({
     from: fromAddress(),
     to: subscriber.email,
-    subject: `Daily Brief · ${dateLabel}`,
-    html: renderDigestHtml(subscriber, digest),
-    text: renderDigestText(subscriber, digest),
+    subject: options?.subject ?? `Daily Brief · ${dateLabel}`,
+    html: renderDigestHtml(subscriber, digest, { introHtml: options?.introHtml }),
+    text: renderDigestText(subscriber, digest, { introText: options?.introText }),
     headers: {
       "List-Unsubscribe": `<${unsub}>`,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
