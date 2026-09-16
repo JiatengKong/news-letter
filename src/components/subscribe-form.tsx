@@ -81,9 +81,9 @@ export function SubscribeForm({
       if (!onSaved) {
         setSaved("Saved.");
       }
+      setPending(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save.");
-    } finally {
       setPending(false);
     }
   }
