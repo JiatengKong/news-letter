@@ -2,8 +2,8 @@ import { getStore, resetStoreCache } from "../src/lib/store";
 import { ensureSchema } from "../src/lib/pg-store";
 
 async function main() {
-  const email = process.env.SEED_EMAIL || "jtngkong@gmail.com";
-  const timezone = process.env.SEED_TIMEZONE || "Europe/Berlin";
+  const email = process.env.SEED_EMAIL || "you@example.com";
+  const timezone = process.env.SEED_TIMEZONE || "Area/City";
   const nextSendAt =
     process.env.SEED_NEXT_SEND_AT || "2026-09-17T06:00:00.000Z";
 
