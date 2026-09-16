@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --port 43123",
     "lint": "eslint",
-    "test": "tsx --test scripts/schedule.test.ts",
+    "test": "tsx --test scripts/schedule.test.ts scripts/digest.test.ts",
     "seed": "tsx scripts/seed-subscriber.ts"
   },
   "dependencies": {

@@ -33,6 +33,30 @@ function clean(text: string | undefined) {
   return text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+export function clipSummary(text: string | undefined, max = 420): string {
+  const cleaned = clean(text);
+  if (!cleaned) return "";
+  if (cleaned.length <= max) return cleaned;
+
+  const sentences = cleaned.split(/(?<=[.!?])\s+/).filter(Boolean);
+  let out = "";
+  for (const sentence of sentences) {
+    const next = out ? `${out} ${sentence}` : sentence;
+    if (next.length <= max) {
+      out = next;
+      continue;
+    }
+    if (out) return out;
+    if (/[.!?]$/.test(sentence) && sentence.length <= Math.round(max * 1.5)) {
+      return sentence;
+    }
+    const cut = sentence.slice(0, max);
+    const lastSpace = cut.lastIndexOf(" ");
+    return `${(lastSpace > 40 ? cut.slice(0, lastSpace) : cut).trim()}…`;
+  }
+  return out;
+}
+
 export async function buildDigest(topics: TopicId[]): Promise<Digest> {
   const wanted = new Set(topics);
   const selected = FEEDS.filter((f) => wanted.has(f.topic));
@@ -47,7 +71,7 @@ export async function buildDigest(topics: TopicId[]): Promise<Digest> {
         const story: Story = {
           id: item.guid || item.link || `${feed.source}:${item.title}`,
           title: clean(item.title) || "Untitled",
-          summary: clean(item.contentSnippet || item.content).slice(0, 280),
+          summary: clipSummary(item.contentSnippet || item.content),
           url: item.link || feed.url,
           source: feed.source,
           topic: feed.topic,
