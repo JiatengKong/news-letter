@@ -57,38 +57,24 @@ export function clipSummary(text: string | undefined, max = 420): string {
   return out;
 }
 
-export const STORIES_PER_TOPIC = 3;
+export const STORIES_PER_TOPIC = 2;
 
 export function pickStories(
   stories: Story[],
   topics: TopicId[],
   perTopic = STORIES_PER_TOPIC,
 ): Story[] {
-  const target = Math.max(perTopic, topics.length * perTopic);
-  const queues = new Map<TopicId, Story[]>();
-  for (const topic of topics) queues.set(topic, []);
-  for (const story of stories) {
-    const queue = queues.get(story.topic);
-    if (queue) queue.push(story);
-  }
-
   const picked: Story[] = [];
   const seen = new Set<string>();
-  let progress = true;
-  while (picked.length < target && progress) {
-    progress = false;
-    for (const topic of topics) {
-      const queue = queues.get(topic);
-      if (!queue?.length) continue;
-      while (queue.length) {
-        const story = queue.shift()!;
-        if (seen.has(story.url)) continue;
-        seen.add(story.url);
-        picked.push(story);
-        progress = true;
-        break;
-      }
-      if (picked.length >= target) break;
+  for (const topic of topics) {
+    let taken = 0;
+    for (const story of stories) {
+      if (story.topic !== topic) continue;
+      if (seen.has(story.url)) continue;
+      seen.add(story.url);
+      picked.push(story);
+      taken += 1;
+      if (taken >= perTopic) break;
     }
   }
   return picked;
