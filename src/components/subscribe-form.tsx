@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TOPICS, type TopicId } from "@/lib/types";
 import { timezonesBySendTime, cronLocalTime } from "@/lib/schedule";
 
@@ -109,18 +116,29 @@ export function SubscribeForm({
 
       <div className="grid gap-2">
         <Label htmlFor="timezone">Timezone</Label>
-        <select
-          id="timezone"
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+        <Select
           value={timezone}
-          onChange={(event) => setTimezone(event.target.value)}
+          onValueChange={(value) => {
+            if (typeof value === "string") setTimezone(value);
+          }}
         >
-          {timezonesBySendTime().map((zone) => (
-            <option key={zone} value={zone}>
-              {zone} · {cronLocalTime(zone)}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            id="timezone"
+            className="h-8 w-full min-w-0 *:data-[slot=select-value]:grid *:data-[slot=select-value]:w-full *:data-[slot=select-value]:grid-cols-[minmax(0,1fr)_auto] *:data-[slot=select-value]:gap-4"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="start" alignItemWithTrigger={false} className="min-w-(--anchor-width)">
+            {timezonesBySendTime().map((zone) => (
+              <SelectItem key={zone} value={zone}>
+                <span className="truncate">{zone}</span>
+                <span className="tabular-nums text-muted-foreground">
+                  {cronLocalTime(zone)}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <p className="text-sm font-medium">
           You will receive the email at {cronLocalTime(timezone)} every day.
         </p>
