@@ -3,7 +3,6 @@ import { getStore } from "@/lib/store";
 import {
   CRON_UTC_HOUR,
   computeNextCronAt,
-  cronLocalTime,
   digestKeyFor,
   formatLocalSend,
 } from "@/lib/schedule";
@@ -44,12 +43,11 @@ export async function POST(request: Request) {
   });
 
   const digest = await buildDigest(subscriber.topics);
-  const localCron = cronLocalTime(timezone, now);
   const nextLabel = formatLocalSend(nextSendAt, timezone);
-  const introText = `You're subscribed. Today's brief is below. The daily send is 06:00 UTC (${localCron} for you) and starts tomorrow (${nextLabel}).`;
+  const introText = `You're subscribed. Today's brief is below. The daily send starts tomorrow (${nextLabel}).`;
   await sendDigest(subscriber, digest, {
     subject: `You're in · today's Daily Brief`,
-    introHtml: `You're subscribed. Today's brief is below. The daily send is <strong>06:00 UTC</strong> (${escapeHtml(localCron)} for you) and starts tomorrow (${escapeHtml(nextLabel)}).`,
+    introHtml: `You're subscribed. Today's brief is below. The daily send starts tomorrow (${escapeHtml(nextLabel)}).`,
     introText,
   });
 
