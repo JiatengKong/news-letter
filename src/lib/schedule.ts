@@ -34,7 +34,7 @@ export function cronLocalTime(timezone: string, at: Date = new Date()): string {
   const local = DateTime.fromJSDate(at, { zone: "UTC" })
     .set({ hour: CRON_UTC_HOUR, minute: 0, second: 0, millisecond: 0 })
     .setZone(timezone || "UTC");
-  return local.toFormat("HH:mm ZZZZ");
+  return local.toFormat("H:mm ZZZZ");
 }
 
 export function digestKeyFor(subscriberId: string, at: Date, timezone: string) {

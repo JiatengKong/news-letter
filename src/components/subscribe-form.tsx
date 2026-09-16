@@ -117,7 +117,7 @@ export function SubscribeForm({
         >
           {timezonesBySendTime().map((zone) => (
             <option key={zone} value={zone}>
-              {cronLocalTime(zone)} · {zone}
+              {zone} · {cronLocalTime(zone)}
             </option>
           ))}
         </select>

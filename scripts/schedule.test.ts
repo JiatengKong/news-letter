@@ -27,8 +27,8 @@ test("subscribe skipToday waits until tomorrow even if today's cron has not run 
 
 test("timezone only relabels 06:00 UTC, it does not move the send", () => {
   const at = new Date("2026-09-16T12:00:00.000Z");
-  assert.match(cronLocalTime("Europe/Berlin", at), /^08:00 /);
-  assert.match(cronLocalTime("America/New_York", at), /^02:00 /);
+  assert.match(cronLocalTime("Europe/Berlin", at), /^8:00 /);
+  assert.match(cronLocalTime("America/New_York", at), /^2:00 /);
 });
 
 test("timezone list is ordered from earliest to latest local send time", () => {
