@@ -57,10 +57,47 @@ export function clipSummary(text: string | undefined, max = 420): string {
   return out;
 }
 
+export const STORIES_PER_TOPIC = 3;
+
+export function pickStories(
+  stories: Story[],
+  topics: TopicId[],
+  perTopic = STORIES_PER_TOPIC,
+): Story[] {
+  const target = Math.max(perTopic, topics.length * perTopic);
+  const queues = new Map<TopicId, Story[]>();
+  for (const topic of topics) queues.set(topic, []);
+  for (const story of stories) {
+    const queue = queues.get(story.topic);
+    if (queue) queue.push(story);
+  }
+
+  const picked: Story[] = [];
+  const seen = new Set<string>();
+  let progress = true;
+  while (picked.length < target && progress) {
+    progress = false;
+    for (const topic of topics) {
+      const queue = queues.get(topic);
+      if (!queue?.length) continue;
+      while (queue.length) {
+        const story = queue.shift()!;
+        if (seen.has(story.url)) continue;
+        seen.add(story.url);
+        picked.push(story);
+        progress = true;
+        break;
+      }
+      if (picked.length >= target) break;
+    }
+  }
+  return picked;
+}
+
 export async function buildDigest(topics: TopicId[]): Promise<Digest> {
   const wanted = new Set(topics);
   const selected = FEEDS.filter((f) => wanted.has(f.topic));
-  const cutoff = Date.now() - 36 * 60 * 60 * 1000;
+  const cutoff = Date.now() - 48 * 60 * 60 * 1000;
 
   const results = await Promise.allSettled(
     selected.map(async (feed) => {
@@ -106,28 +143,9 @@ export async function buildDigest(topics: TopicId[]): Promise<Digest> {
     return tb - ta;
   });
 
-  const byTopic = new Map<TopicId, Story[]>();
-  for (const story of stories) {
-    const list = byTopic.get(story.topic) ?? [];
-    if (list.length < 3) list.push(story);
-    byTopic.set(story.topic, list);
-  }
-
-  const picked: Story[] = [];
-  for (const topic of topics) {
-    picked.push(...(byTopic.get(topic) ?? []));
-  }
-
-  if (picked.length < 6) {
-    for (const story of stories) {
-      if (picked.length >= 10) break;
-      if (!picked.some((s) => s.url === story.url)) picked.push(story);
-    }
-  }
-
   return {
     key: new Date().toISOString().slice(0, 10),
     generatedAt: new Date().toISOString(),
-    stories: picked.slice(0, 12),
+    stories: pickStories(stories, topics),
   };
 }
