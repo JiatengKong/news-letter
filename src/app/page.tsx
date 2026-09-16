@@ -26,24 +26,10 @@ export default function Home() {
             The world, briefly, at the hour you actually read email.
           </h1>
           <p className="max-w-lg text-base leading-7 text-muted-foreground">
-            Daily Brief pulls overnight stories from BBC, The Guardian, NPR, and
-            Al Jazeera, then sends one email with the desks you chose. Pause or
-            leave in one click. No account, no paywall.
+            One email a day from BBC, The Guardian, NPR, and Al Jazeera. Pick
+            your hour and desks here; manage or leave from the link in every
+            issue.
           </p>
-          <ul className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
-            <li className="rounded-xl border border-border bg-card p-4">
-              <strong className="block text-foreground">Your hour</strong>
-              Default 08:00 Europe/Berlin. Change it any time.
-            </li>
-            <li className="rounded-xl border border-border bg-card p-4">
-              <strong className="block text-foreground">Your desks</strong>
-              World, politics, business, science, climate, culture.
-            </li>
-            <li className="rounded-xl border border-border bg-card p-4">
-              <strong className="block text-foreground">Your exit</strong>
-              Manage and unsubscribe links in every issue.
-            </li>
-          </ul>
         </section>
 
         <Card className="h-fit">

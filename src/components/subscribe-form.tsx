@@ -21,6 +21,8 @@ type Props = {
   mode?: "subscribe" | "manage";
   token?: string;
   status?: string;
+  onCancel?: () => void;
+  onSaved?: () => void;
 };
 
 export function SubscribeForm({
@@ -28,6 +30,8 @@ export function SubscribeForm({
   mode = "subscribe",
   token,
   status,
+  onCancel,
+  onSaved,
 }: Props) {
   const router = useRouter();
   const [email, setEmail] = useState(defaults?.email ?? "");
@@ -82,38 +86,17 @@ export function SubscribeForm({
         router.push(`/manage/${data.manageToken}?welcome=1`);
         return;
       }
-      setSaved(
-        data.nextSendAt
-          ? `Saved. Next send ${new Date(data.nextSendAt).toUTCString()}.`
-          : "Saved.",
-      );
       router.refresh();
+      onSaved?.();
+      if (!onSaved) {
+        setSaved(
+          data.nextSendAt
+            ? `Saved. Next send ${new Date(data.nextSendAt).toUTCString()}.`
+            : "Saved.",
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save.");
-    } finally {
-      setPending(false);
-    }
-  }
-
-  async function setStatus(next: "active" | "paused" | "unsubscribed") {
-    if (!token) return;
-    setPending(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/manage", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token, status: next, timezone, sendHour, topics }),
-      });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error || "Could not update.");
-      if (next === "unsubscribed") {
-        router.push(`/unsubscribe/${token}?done=1`);
-        return;
-      }
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update.");
     } finally {
       setPending(false);
     }
@@ -204,34 +187,14 @@ export function SubscribeForm({
               ? "Save preferences"
               : "Start the brief"}
         </Button>
-        {mode === "manage" && status === "active" ? (
+        {mode === "manage" && onCancel ? (
           <Button
             type="button"
             variant="outline"
             disabled={pending}
-            onClick={() => setStatus("paused")}
+            onClick={onCancel}
           >
-            Pause
-          </Button>
-        ) : null}
-        {mode === "manage" && status === "paused" ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending}
-            onClick={() => setStatus("active")}
-          >
-            Resume
-          </Button>
-        ) : null}
-        {mode === "manage" && status !== "unsubscribed" ? (
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={pending}
-            onClick={() => setStatus("unsubscribed")}
-          >
-            Unsubscribe
+            Cancel
           </Button>
         ) : null}
       </div>

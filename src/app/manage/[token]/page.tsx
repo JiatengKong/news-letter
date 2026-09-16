@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { SubscribeForm } from "@/components/subscribe-form";
+import { ManageSubscription } from "@/components/manage-subscription";
 import { getStore } from "@/lib/store";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default async function ManagePage({
   params,
@@ -30,31 +30,22 @@ export default async function ManagePage({
         </h1>
         <Badge variant="secondary">{subscriber.status}</Badge>
       </div>
-      {query.welcome ? (
-        <p className="mt-3 text-sm text-muted-foreground">
-          You are in. Bookmark this page. Every email also links here.
-        </p>
-      ) : (
-        <p className="mt-3 text-sm text-muted-foreground">
-          Next send: {new Date(subscriber.nextSendAt).toUTCString()}
-        </p>
-      )}
+      <p className="mt-3 text-sm text-muted-foreground">
+        {query.welcome
+          ? "You are in. This page is a record of what you chose."
+          : "Your current send settings."}
+      </p>
 
       <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Preferences</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SubscribeForm
-            mode="manage"
+        <CardContent className="pt-6">
+          <ManageSubscription
             token={token}
+            email={subscriber.email}
             status={subscriber.status}
-            defaults={{
-              email: subscriber.email,
-              timezone: subscriber.timezone,
-              sendHour: subscriber.sendHour,
-              topics: subscriber.topics,
-            }}
+            timezone={subscriber.timezone}
+            sendHour={subscriber.sendHour}
+            topics={subscriber.topics}
+            nextSendAt={subscriber.nextSendAt}
           />
         </CardContent>
       </Card>
