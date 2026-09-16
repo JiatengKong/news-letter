@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TOPICS, type TopicId } from "@/lib/types";
-import { TIMEZONES } from "@/lib/schedule";
+import { TIMEZONES, cronLocalTime } from "@/lib/schedule";
 
 type Props = {
   defaults?: {
@@ -109,10 +109,6 @@ export function SubscribeForm({
 
       <div className="grid gap-2">
         <Label htmlFor="timezone">Timezone</Label>
-        <p className="text-xs text-muted-foreground">
-          Everyone is sent on the same daily run (06:00 UTC). Timezone only
-          changes how that time is shown for you.
-        </p>
         <select
           id="timezone"
           className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
@@ -121,10 +117,13 @@ export function SubscribeForm({
         >
           {TIMEZONES.map((zone) => (
             <option key={zone} value={zone}>
-              {zone}
+              {zone} · {cronLocalTime(zone)}
             </option>
           ))}
         </select>
+        <p className="text-sm font-medium">
+          You will receive the email at {cronLocalTime(timezone)} every day.
+        </p>
       </div>
 
       <fieldset className="grid gap-3">
