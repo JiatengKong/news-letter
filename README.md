@@ -1,12 +1,18 @@
 # Daily Brief
 
-A once-a-day world news digest. Subscribers pick their timezone and desks (world, politics, business, science, climate, culture). Each issue takes two stories per desk, in the order chosen, from BBC, The Guardian, NPR, and Al Jazeera, and is sent with Resend.
+**Live app:** [https://daily-brief-iota-two.vercel.app](https://daily-brief-iota-two.vercel.app)
+
+**Sample brief (share this):** [https://daily-brief-iota-two.vercel.app/preview](https://daily-brief-iota-two.vercel.app/preview)
+
+That public `/preview` page is the same layout as the email, built from today's feeds. Share that URL so others can see how the brief looks. It has no subscribe or unsubscribe controls. Do not forward the email you received: it includes your personal manage and unsubscribe links.
+
+The Vercel origin is what subscribers open. A GitHub Pages site (for example `https://simplepossible.github.io/news-letter/`) only publishes this README. It is not the Next.js app and cannot subscribe, send email, or run cron.
+
+A once-a-day world news digest. Subscribers pick their timezone and desks (world, politics, business, science, climate, culture). Each issue takes two stories per desk, in the order chosen, from BBC, The Guardian, NPR, and Al Jazeera, and is sent with Resend. Live blogs are skipped (they often carry newsletter/app promo in the abstract). Within a desk the two stories come from different outlets when possible, and politics draws UK and US desks rather than only Guardian US news.
 
 On subscribe, Daily Brief emails today's brief immediately and confirms the subscription. After that, **every subscriber is sent on the same Vercel Hobby cron: 06:00 UTC** (`0 6 * * *` in `vercel.json`). Timezone only changes how that clock time is displayed (08:00 in Berlin in summer, 02:00 in New York, and so on). A per-person send hour is not offered, because Hobby can run only one cron job per day.
 
 Manage and unsubscribe links are in every email. There is no login: the manage URL is the credential.
-
-Live public sample: https://daily-brief-iota-two.vercel.app/preview
 
 ## Local development
 
@@ -48,4 +54,4 @@ The tick is **idempotent**: it claims `(subscriber_id, digest_key)` where `diges
 
 ## Deploy
 
-The GitHub repo is the production source. Create a Vercel project on the Hobby team, set the env vars, deploy, then set `APP_URL` to the real `https://` domain and redeploy so email links resolve.
+Production is the Vercel app above. GitHub is the source repository. After a push, deploy from this repo (or `vercel --prod`) and keep `APP_URL` set to `https://daily-brief-iota-two.vercel.app`.
